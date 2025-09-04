@@ -1,0 +1,36 @@
+    trigger:
+    - main # or your desired branch
+
+    pool:
+      vmImage: 'ubuntu-latest' # or 'windows-latest'
+
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '>=18.x' # Specify a Node.js version compatible with Playwright
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm ci # Install project dependencies
+      displayName: 'Install dependencies'
+
+    - script: |
+        npx playwright install --with-deps # Install Playwright browsers and their dependencies
+      displayName: 'Install Playwright Browsers'
+
+    - script: |
+        npx playwright test # Run your Playwright tests
+      displayName: 'Run Playwright pruebas'
+
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit' # Or 'NUnit', 'XUnit' etc. depending on your Playwright reporter
+        testResultsFiles: 'test-results/**/*.xml' # Path to your test results file
+        failTaskOnFailedTests: true
+      displayName: 'Publish Test Results'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: 'playwright-report' # If you want to publish the Playwright HTML report
+        artifactName: 'PlaywrightReport'
+      displayName: 'Publish Playwright Report'
